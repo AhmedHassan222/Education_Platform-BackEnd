@@ -1,8 +1,14 @@
 import mongoose from "mongoose";
 
+import dotenv from 'dotenv';
+dotenv.config();
+
+const dbUrlCloud = process.env.DB_URL_CLOUD;
+
+
 export const connectionDB = async () => {
   return await mongoose
-    .connect(process.env.DB_URL_CLOUD)
+    .connect(dbUrlCloud)
     .then(() => {
       console.log("connection DB success");
     })
@@ -10,4 +16,3 @@ export const connectionDB = async () => {
       console.log("connection DB faild");
     });
 };
-console.log();
