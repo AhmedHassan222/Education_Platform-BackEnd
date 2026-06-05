@@ -48,26 +48,26 @@ export const signUp = async (req, res, next) => {
         },
       });
       if (token) {
-        const confirmationLink = `${req.protocol}://${req.headers.host}/auth/confirmEmail/${token}`;
-        // const message = `<a href=${confirmationLink}>click here</a>`;
-        const emailSent = await sendEmail({
-          to: email,
-          subject: "Confirmation email",
-          message: emailTemplate({
-            link: confirmationLink,
-            linkData: "Click to Confirm",
-            subject: "confirmation email ",
-          }),
-        });
-        console.log(emailSent);
-        if (emailSent) {
-          // await newUser.save();
+      //   const confirmationLink = `${req.protocol}://${req.headers.host}/auth/confirmEmail/${token}`;
+      //   // const message = `<a href=${confirmationLink}>click here</a>`;
+      //   const emailSent = await sendEmail({
+      //     to: email,
+      //     subject: "Confirmation email",
+      //     message: emailTemplate({
+      //       link: confirmationLink,
+      //       linkData: "Click to Confirm",
+      //       subject: "confirmation email ",
+      //     }),
+      //   });
+      //   console.log(emailSent);
+      //   if (emailSent) {
+          await newUser.save();
           return res
             .status(201)
-            .json({ message: "Sign up success please confirm email" });
-        } else {
-          next(new Error("Send Email Fail please try again", { cause: 500 }));
-        }
+            .json({ message: "Sign up success" });
+      //   } else {
+      //     next(new Error("Send Email Fail please try again", { cause: 500 }));
+      //   }
       } else {
         next(new Error("Token generastion fail", { cause: 400 }));
       }
