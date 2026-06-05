@@ -61,7 +61,7 @@ export const signUp = async (req, res, next) => {
       //   });
       //   console.log(emailSent);
       //   if (emailSent) {
-          await newUser.save();
+          // await newUser.save();
           return res
             .status(201)
             .json({ message: "Sign up success" });
