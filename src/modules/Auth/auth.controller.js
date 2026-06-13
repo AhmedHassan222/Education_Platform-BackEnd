@@ -1,11 +1,8 @@
 import { userModel } from "../../../DB/Models/user.model.js";
-import { sendEmail } from "../../services/sendEmail.js";
 import { comparePassword, hashingPassword } from "../../utils/hashing.js";
-import { decodeToken, generateToken } from "../../utils/tokenFunctions.js";
+import { generateToken } from "../../utils/tokenFunctions.js";
 import bcrypt from "bcrypt";
-import { emailTemplate } from "./../../utils/emailTemplate.js";
 import { nanoid } from "nanoid";
-import { decryptText, encryptText } from "../../utils/encryptionFunction.js";
 import { systemRoles } from "../../utils/systemRoles.js";
 import { courseModel } from "../../../DB/Models/course.model.js";
 import { ApiFeature } from "../../utils/apiFeature.js";
@@ -35,79 +32,21 @@ export const signUp = async (req, res, next) => {
     return next(new Error("Email Already Exist", { cause: 401 }));
   }
 
-  // Encrypt plain password before embedding it in the JWT so it never travels as plaintext
-  const encryptedPassword = encryptText(password, process.env.CRYPTO_SECRET_KEY);
-
-  const token = generateToken({
-    payload: {
-      fullName,
-      email,
-      password: encryptedPassword,
-      gender,
-      phoneNumber,
-      parentsPhoneNumber,
-      stage,
-      grade,
-    },
-  });
-
-  if (!token) {
-    return next(new Error("Token generation failed", { cause: 400 }));
-  }
-
-  const confirmationLink = `${req.protocol}://${req.headers.host}/auth/confirmEmail/${token}`;
-
-  const emailSent = await sendEmail({
-    to: email,
-    subject: "Confirmation email",
-    message: emailTemplate({
-      link: confirmationLink,
-      linkData: "Click to Confirm",
-      subject: "Confirmation email",
-    }),
-  });
-
-  if (!emailSent) {
-    return next(new Error("Failed to send email, please try again", { cause: 500 }));
-  }
-
-  return res.status(201).json({ message: "Sign up success, please check your email to confirm your account" });
-};
-
-// _____________________confirmEmail________________________
-
-export const confirmEmail = async (req, res, next) => {
-  const { token } = req.params;
-  const decode = decodeToken({ payload: token });
-
-  if (!decode) {
-    return next(new Error("Unknown error, please try again", { cause: 500 }));
-  }
-
-  const alreadyConfirmed = await userModel.findOne({ email: decode.email, isConfirmed: true });
-  if (alreadyConfirmed) {
-    return next(new Error("Email already confirmed", { cause: 400 }));
-  }
-
-  // Decrypt the password that was stored in the token
-  const decryptedPassword = decryptText(decode.password, process.env.CRYPTO_SECRET_KEY);
-
-  // Only pick the fields we expect — never spread the whole JWT decode object
-  const confirmUser = new userModel({
-    fullName: decode.fullName,
-    email: decode.email,
-    password: decryptedPassword,      // hashed by the pre-save hook in the model
-    gender: decode.gender,
-    phoneNumber: decode.phoneNumber,
-    parentsPhoneNumber: decode.parentsPhoneNumber,
-    stage: decode.stage,
-    grade: decode.grade,
+  const newUser = new userModel({
+    fullName,
+    email,
+    password,         // hashed by the pre-save hook in userModel
+    gender,
+    phoneNumber,
+    parentsPhoneNumber,
+    stage,
+    grade,
     isConfirmed: true,
   });
 
-  await confirmUser.save();
+  await newUser.save();
 
-  return res.status(200).json({ message: "Confirmation success, please try to login" });
+  return res.status(201).json({ message: "Sign up success, please try to login" });
 };
 
 // ______________________________login________________________________
