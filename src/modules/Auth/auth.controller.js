@@ -46,7 +46,7 @@ export const signUp = async (req, res, next) => {
 
   await newUser.save();
 
-  return res.status(201).json({ message: "Sign up success, please try to login" , success:true});
+  return res.status(201).json({ message: "Sign up success, please try to login", success: true });
 };
 
 // ______________________________login________________________________
@@ -90,7 +90,7 @@ export const login = async (req, res, next) => {
     return next(new Error("Login failed, please try again"));
   }
 
-  return res.status(200).json({ message: "Login success", token ,  success:true });
+  return res.status(200).json({ message: "Login success", token, success: true });
 };
 
 // ________________________forgetPassword________________________
@@ -341,7 +341,7 @@ export const deleteTeacher = async (req, res, next) => {
 // ====================getTeachers====================
 
 export const getTeacher = async (req, res, next) => {
-  const apiFeaturesInstance = new ApiFeature(userModel.find(), req.query)
+  const apiFeaturesInstance = new ApiFeature(userModel.find({ role: systemRoles.TEACHER }), req.query)
     .paginated()
     .sort()
     .select()
@@ -354,7 +354,7 @@ export const getTeacher = async (req, res, next) => {
   });
 
   const paginationInfo = await apiFeaturesInstance.paginationInfo;
-  const all = await userModel.find().countDocuments();
+  const all = await userModel.find({ role: systemRoles.TEACHER }).countDocuments();
   const totalPages = Math.ceil(all / paginationInfo.perPages);
   paginationInfo.totalPages = totalPages;
 
