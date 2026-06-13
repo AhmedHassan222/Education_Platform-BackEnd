@@ -46,7 +46,7 @@ export const signUp = async (req, res, next) => {
 
   await newUser.save();
 
-  return res.status(201).json({ message: "Sign up success, please try to login" });
+  return res.status(201).json({ message: "Sign up success, please try to login" , success:true});
 };
 
 // ______________________________login________________________________
@@ -90,7 +90,7 @@ export const login = async (req, res, next) => {
     return next(new Error("Login failed, please try again"));
   }
 
-  return res.status(200).json({ message: "Login success", token });
+  return res.status(200).json({ message: "Login success", token ,  success:true });
 };
 
 // ________________________forgetPassword________________________
